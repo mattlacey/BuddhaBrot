@@ -13,7 +13,7 @@
 #include "Defines.h"
 
 void Init();
-void Calculate();
+int Calculate(void *channel);
 void DumpImage();
 void Render(SDL_Surface * pScreen);
 

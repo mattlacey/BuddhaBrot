@@ -20,12 +20,12 @@
 	#define SCREEN_Y	(600)
 #endif
 
-#define RENDER_X		(800) //(4800)
-#define RENDER_Y		(600) //(3200)
+#define RENDER_X		(800)
+#define RENDER_Y		(600)
 
 // more iterations take longer obviously :) 
-#define ITERATIONS		(2048) //(131072)
-#define RESOLUTION		(10)
+#define ITERATIONS		(500000)
+#define RESOLUTION		(50)
 
 #define ARGB(a, r, g, b)	((b) << 24 | (g) << 16 | (r) << 8 | a)
 #define RGBA(r, g, b, a)	((a) << 24 | (b) << 16 | (g) << 8 | r)

@@ -10,7 +10,19 @@ int main(int, char**) {
 	}
 
 	Init();
-	Calculate();
+
+	int r = 0, g = 1, b = 2;
+
+	SDL_Thread * red = SDL_CreateThread(Calculate, "Red Thread", (void *)&r);
+	SDL_Thread * green = SDL_CreateThread(Calculate, "Green Thread", (void *)&g);
+	SDL_Thread * blue = SDL_CreateThread(Calculate, "Blue Thread", (void *)&b);
+
+	SDL_WaitThread(red, &r);
+	SDL_WaitThread(green, &g);
+	SDL_WaitThread(blue, &b);
+
+	DumpImage();
+
 
 	SDL_Quit();
 	return 0;

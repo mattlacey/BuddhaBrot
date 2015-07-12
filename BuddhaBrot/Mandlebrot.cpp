@@ -17,12 +17,19 @@
 
 #define WITHIN(X, MIN, MAX) ((X) < (MIN) ? 0 : ((X) > (MAX) ? 0 : 1))
 
-int		x = 0, y = 0, i = 0;
 float	* pData = NULL;
-// double	dScale	= 0.00075;
-double	dScale = 0.00375;			// reduce this as the render resolution increases
+
+// This controls the 'zoom' and position of the image. Default is 3 / X_RES which gives a good fit for the whole image.
+double	dScale = (3.0 / RENDER_X);			
 double	dCentreX = 0;
 double	dCentreY = 0;
+
+// This gives a nice detail snapshot near the 'head'
+/*
+double	dScale = (0.5 / RENDER_X);
+double	dCentreX = -1.2;
+double	dCentreY = 0.2;
+*/
 
 void Init()
 {
@@ -35,7 +42,7 @@ void Init()
 	}
 }
 
-void Calculate()
+int Calculate(void * channel)
 {
 	int			j, xx, yy;
 	double		dInc = dScale;
@@ -43,18 +50,22 @@ void Calculate()
 	TComplex	c, z;
 	int			iCount = 0, iEscape = 2;
 
-	if(i == 3)
+	int i = *((int *)channel);
+
+	while (i--)
 	{
-		return;
+		rand();
 	}
 
-	for(i = 0; i < 3; i++)
+	i = *((int *)channel);
+	
+
 	{
-		for(x = 0; x < RENDER_X; x++)
+		for(int x = 0; x < RENDER_X; x++)
 		{
-			for(y = 0; y < RENDER_Y; y++)
+			for(int y = 0; y < RENDER_Y; y++)
 			{
-				if(rand() < (RAND_MAX * (0.1 + (0.4 * i))))
+				if(rand() < (RAND_MAX * (0.1 + (.4 * i))))
 				{
 					continue;
 				}
@@ -87,7 +98,7 @@ void Calculate()
 
 					// for Mandelbrot you basically do if(iCount < ITERATIONS) pData[x][y] = iCount here intead of the crap below
 
-					if (iCount < ITERATIONS * (i + 1))
+					if (iCount < ITERATIONS  * (i + 1))
 					{
 						c.dR = (x - RENDER_X / 2) * dInc + (dInc * j / RESOLUTION) + dCentreX;
 						c.dI = (y - RENDER_Y / 2) * dInc + (dInc * j / RESOLUTION) + dCentreY;
@@ -118,7 +129,7 @@ void Calculate()
 
 								// decrease this for higher resolution renderings or it gets over exposed, also as iterations go up 
 								// pixels get more coverage so that's a factor.
-								*pValue += 255.0f;
+								*pValue += 16.0f;
 							}
 						}
 					}
@@ -126,10 +137,10 @@ void Calculate()
 			}
 		}
 
-		printf("Working: %i%\n", (100 * (i + 1)) / 3);
+		printf("Done: %i%\n", i);
 	}
-	
-	DumpImage();
+
+	return 0;
 }
 
 void DumpImage()
@@ -142,11 +153,11 @@ void DumpImage()
 	{
 		float max[3] = {1, 1, 1};
 		
-		for(i = 0; i < 3; i++)
+		for(int i = 0; i < 3; i++)
 		{
-			for(x = 0; x < RENDER_X; x++)
+			for(int x = 0; x < RENDER_X; x++)
 			{
-				for(y = 0; y < RENDER_Y; y++)
+				for(int y = 0; y < RENDER_Y; y++)
 				{
 					float fVal = pData[i * RENDER_X * RENDER_Y + y * RENDER_X + x];
 					
@@ -158,9 +169,9 @@ void DumpImage()
 			}
 		}
 		
-		for(y = 0; y < RENDER_Y; y++)
+		for(int y = 0; y < RENDER_Y; y++)
 		{
-			for(x = 0; x < RENDER_X; x++)
+			for(int x = 0; x < RENDER_X; x++)
 			{
 				r = (pData[y * RENDER_X + x] * 255) / max[0];
 				g = (pData[RENDER_X * RENDER_Y + y * RENDER_X + x] * 255) / max[1];
