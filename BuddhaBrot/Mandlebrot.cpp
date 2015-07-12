@@ -59,20 +59,44 @@ int Calculate(void * channel)
 
 	i = *((int *)channel);
 	
-
+	for(int x = 0; x < RENDER_X; x++)
 	{
-		for(int x = 0; x < RENDER_X; x++)
+		for(int y = 0; y < RENDER_Y; y++)
 		{
-			for(int y = 0; y < RENDER_Y; y++)
+			if(rand() < (RAND_MAX * (0.1 + (.4 * i))))
 			{
-				if(rand() < (RAND_MAX * (0.1 + (.4 * i))))
+				continue;
+			}
+				
+			iCount = 0;
+				
+			for (j = 0; j < RESOLUTION; j++)
+			{
+				c.dR = (x - RENDER_X / 2) * dInc + (dInc * j / RESOLUTION) + dCentreX;
+				c.dI = (y - RENDER_Y / 2) * dInc + (dInc * j / RESOLUTION) + dCentreY;
+
+				z.dR = 0;
+				z.dI = 0;
+
+				dSize = (c.dR * c.dR) + (c.dI * c.dI);
+
+				while (dSize < iEscape && iCount < ITERATIONS * (i + 1))
 				{
-					continue;
+					TComplex temp;
+
+					temp.dR = (z.dR * z.dR - z.dI * z.dI);
+					temp.dI = (2 * z.dR * z.dI);
+
+					z.dR = temp.dR + c.dR;
+					z.dI = temp.dI + c.dI;
+
+					iCount++;
+					dSize = (z.dR * z.dR) + (z.dI * z.dI);
 				}
-				
-				iCount = 0;
-				
-				for (j = 0; j < RESOLUTION; j++)
+
+				// for Mandelbrot you basically do if(iCount < ITERATIONS) pData[x][y] = iCount here intead of the crap below
+
+				if (iCount < ITERATIONS  * (i + 1))
 				{
 					c.dR = (x - RENDER_X / 2) * dInc + (dInc * j / RESOLUTION) + dCentreX;
 					c.dI = (y - RENDER_Y / 2) * dInc + (dInc * j / RESOLUTION) + dCentreY;
@@ -82,7 +106,7 @@ int Calculate(void * channel)
 
 					dSize = (c.dR * c.dR) + (c.dI * c.dI);
 
-					while (dSize < iEscape && iCount < ITERATIONS * (i + 1))
+					while (dSize < iEscape)
 					{
 						TComplex temp;
 
@@ -92,45 +116,18 @@ int Calculate(void * channel)
 						z.dR = temp.dR + c.dR;
 						z.dI = temp.dI + c.dI;
 
-						iCount++;
 						dSize = (z.dR * z.dR) + (z.dI * z.dI);
-					}
 
-					// for Mandelbrot you basically do if(iCount < ITERATIONS) pData[x][y] = iCount here intead of the crap below
+						xx = (int)((RENDER_X / 2) + (z.dR - dCentreX) / dInc);
+						yy = (int)((RENDER_Y / 2) + (z.dI - dCentreY) / dInc);
 
-					if (iCount < ITERATIONS  * (i + 1))
-					{
-						c.dR = (x - RENDER_X / 2) * dInc + (dInc * j / RESOLUTION) + dCentreX;
-						c.dI = (y - RENDER_Y / 2) * dInc + (dInc * j / RESOLUTION) + dCentreY;
-
-						z.dR = 0;
-						z.dI = 0;
-
-						dSize = (c.dR * c.dR) + (c.dI * c.dI);
-
-						while (dSize < iEscape)
+						if (WITHIN(xx, 0, RENDER_X - 1) && WITHIN(yy, 0, RENDER_Y - 1))
 						{
-							TComplex temp;
+							float * pValue = pData + (RENDER_X * RENDER_Y * i) + yy * RENDER_X + xx;
 
-							temp.dR = (z.dR * z.dR - z.dI * z.dI);
-							temp.dI = (2 * z.dR * z.dI);
-
-							z.dR = temp.dR + c.dR;
-							z.dI = temp.dI + c.dI;
-
-							dSize = (z.dR * z.dR) + (z.dI * z.dI);
-
-							xx = (int)((RENDER_X / 2) + (z.dR - dCentreX) / dInc);
-							yy = (int)((RENDER_Y / 2) + (z.dI - dCentreY) / dInc);
-
-							if (WITHIN(xx, 0, RENDER_X - 1) && WITHIN(yy, 0, RENDER_Y - 1))
-							{
-								float * pValue = pData + (RENDER_X * RENDER_Y * i) + yy * RENDER_X + xx;
-
-								// decrease this for higher resolution renderings or it gets over exposed, also as iterations go up 
-								// pixels get more coverage so that's a factor.
-								*pValue += 16.0f;
-							}
+							// decrease this for higher resolution renderings or it gets over exposed, also as iterations go up 
+							// pixels get more coverage so that's a factor.
+							*pValue += 16.0f;
 						}
 					}
 				}
